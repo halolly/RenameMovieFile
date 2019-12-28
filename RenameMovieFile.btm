@@ -1,0 +1,38 @@
+:: benennt die per Parameter angegebene Datei in den Namen des ³bergeordneten Ordners um,
+:: verschiebt die Datei eine Verzeichnisebene h÷her und l÷scht das Verzeichnis
+:: f³r Einsatz in Total Commander gedacht mit Parametern %P%N
+@echo off
+SET Fullname=%1
+
+:: Pfad extrahieren und evtl. vorhandenen \ am Ende entfernen
+SET Zielname=%@PATH[%FullName]
+SET Zielname=%@rtrim[\,%Zielname]
+:: Pfad f¦r sp§teres Verschieben merken
+SET Pfad=%Zielname
+:: Verzeichnisnamen extrahieren, Endung wieder anhºngen
+SET Zielname=%@FILENAME[%Zielname].%@EXT[%Fullname]
+
+:: ein paar Schlªsselworte aus dem Dateinamen l©schen
+if %@index[%Zielname,GERMAN] GE 0 Set Zielname=%@replace[GERMAN,,%Zielname]
+if %@index[%Zielname,DOKU] GE 0 Set Zielname=%@replace[DOKU,,%Zielname]
+if %@index[%Zielname,HDTV] GE 0 Set Zielname=%@replace[HDTV,,%Zielname]
+
+:: doppelte Punkte durch einzelnen ersetzen
+:Loop
+if %@index[%Zielname,..] EQ -1 GOTO weiter
+	Set Zielname=%@replace[..,.,%Zielname]
+GOTO Loop
+
+:weiter
+
+REN %Fullname "%Zielname"
+
+:: Datei nach ein Verzeichnis h¸her verschieben
+Set Zielname=%Pfad%\%Zielname%
+Set UpDir=\..
+SET UpPfad=%Pfad%%UpDir%
+move "%Zielname" "%UpPfad"
+
+:: ¦berfl¦ssiges Verzeichnis l¸schen
+DEL "%Pfad" /s/x/y
+
